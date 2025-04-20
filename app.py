@@ -4,7 +4,7 @@
 @Author: binkuolo
 @Des: app运行时文件
 """
-
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -113,3 +113,6 @@ application.mount('/', StaticFiles(directory=settings.STATIC_DIR), name="static"
 application.state.views = Jinja2Templates(directory=settings.TEMPLATE_DIR)
 
 app = application
+
+if __name__ == '__main__':
+    uvicorn.run(app=app)

@@ -69,27 +69,20 @@ async def mysql_operational_error(_: Request, exc: OperationalError):
     return JSONResponse({
         "code": -1,
         "message": "数据操作失败",
-        "data": []
-    }, status_code=500)
+        "data": []}, status_code=500)
+
 
 
 async def http_error_handler(_: Request, exc: HTTPException):
-    """
-    http异常处理
-    :param _:
-    :param exc:
-    :return:
-    """
     if exc.status_code == 401:
         return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
-
     return JSONResponse({
         "code": exc.status_code,
         "message": exc.detail,
         "data": exc.detail
     }, status_code=exc.status_code, headers=exc.headers)
 
-
+# 启动器的异常
 class UnicornException(Exception):
 
     def __init__(self, code, errmsg, data=None):
