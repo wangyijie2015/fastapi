@@ -1,10 +1,4 @@
 # -*- coding:utf-8 -*-
-"""
-@Created on : 2022/4/22 22:02
-@Author: binkuolo
-@Des: 基本配置文件
-"""
-
 import os
 from dotenv import load_dotenv, find_dotenv
 from pydantic import BaseSettings
@@ -17,10 +11,10 @@ class Config(BaseSettings):
     # 调试模式
     APP_DEBUG: bool = True
     # 项目信息
-    VERSION: str = "0.0.1"
+    VERSION: str = "1.0.1"
     PROJECT_NAME: str = "fasdapi"
     DESCRIPTION: str = '<a href="/redoc" target="_blank">redoc</a>'
-    # 静态资源目录
+    # 静态资源目录 vue文件的路径
     STATIC_DIR: str = os.path.join(os.getcwd(), "static")
     TEMPLATE_DIR: str = os.path.join(STATIC_DIR, "templates")
     # 跨域请求
