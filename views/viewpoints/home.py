@@ -1,7 +1,5 @@
 # -*- coding:utf-8 -*-
 """
-@Time : 2022/4/23 8:33 PM
-@Author: binkuolo
 @Des: views home
 """
 from fastapi import Request, APIRouter

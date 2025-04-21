@@ -22,7 +22,7 @@ class BaseMiddleware:
         self.app = app
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        if scope["type"] != "http":  # 非http协议
+        if scope["type"] != "http":  # 非http协议  拿出HTTP请求
             await self.app(scope, receive, send)
             return
         # 记录开始事件

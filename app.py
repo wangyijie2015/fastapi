@@ -74,11 +74,13 @@ async def redoc_html():
 
 
 # 事件监听
+# 事件的订阅启动 终止事件
 application.add_event_handler("startup", Events.startup(application))
 application.add_event_handler("shutdown", Events.stopping(application))
 
 # 异常错误处理
 application.add_exception_handler(HTTPException, Exception.http_error_handler)
+# 请求验证错误
 application.add_exception_handler(RequestValidationError, Exception.http422_error_handler)
 application.add_exception_handler(Exception.UnicornException, Exception.unicorn_exception_handler)
 application.add_exception_handler(DoesNotExist, Exception.mysql_does_not_exist)
