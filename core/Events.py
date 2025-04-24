@@ -15,6 +15,7 @@ def startup(app: FastAPI) -> Callable:
     FastApi 启动完成事件
     :param app: FastAPI
     :return: start_app
+    开启mysql连接和redis缓存启用
     """
     async def app_start() -> None:
         # APP启动完成后触发
@@ -34,6 +35,7 @@ def stopping(app: FastAPI) -> Callable:
     FastApi 停止事件
     :param app: FastAPI
     :return: stop_app
+
     """
     async def stop_app() -> None:
         # APP停止时触发
