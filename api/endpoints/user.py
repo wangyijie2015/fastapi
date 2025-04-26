@@ -1,9 +1,5 @@
 # -*- coding:utf-8 -*-
-"""
-@Time : 2022/4/27 5:24 PM
-@Author: binkuolo
-@Des: 用户管理
-"""
+
 import os
 import time
 
@@ -21,8 +17,9 @@ from tortoise.queryset import F
 
 from schemas.user import UpdateUserInfo, ModifyMobile
 
+# 创建一个APIRouter实例，所有路由都以/user为前缀
 router = APIRouter(prefix='/user')
-
+# 下面接口模块实现了 完整的用户管理功能，包括CRUD操作、认证授权、个人信息维护等，适合作为后台管理系统的用户管理组件。
 
 @router.post("", summary="用户添加", dependencies=[Security(check_permissions, scopes=["user_add"])])
 async def user_add(post: user.CreateUser):
@@ -57,7 +54,7 @@ async def user_del(req: Request, user_id: int):
     :return:
     """
     if req.state.user_id == user_id:
-        return fail(msg="你不能把自己踢出局吧?")
+        return fail(msg="对于用户删除不能删除自身")
     delete_action = await User.filter(pk=user_id).delete()
     if not delete_action:
         return fail(msg=f"用户{user_id}删除失败!")
@@ -70,6 +67,11 @@ async def user_update(post: user.UpdateUser):
     更新用户信息
     :param post:
     :return:
+    需要user_update权限
+    检查用户是否存在
+    检查用户名是否冲突
+    处理密码更新
+    执行更新操作
     """
     user_check = await User.get_or_none(pk=post.id)
     # 超级管理员或不存在的用户
@@ -113,6 +115,15 @@ async def set_role(post: user.SetRole):
     return success(msg="角色分配成功!")
 
 
+"""
+用户列表查询
+
+:param post:
+:return:
+支持分页、筛选(用户名、手机号、状态、创建时间范围)
+排除超级管理员(ID=1)
+返回Ant Design Pro兼容的格式
+"""
 @router.get("",
             summary="用户列表",
             response_model=user.UserListData,
@@ -142,6 +153,7 @@ async def user_list(
     if create_time:
         query.setdefault('create_time__range', create_time)
 
+    #排除掉超级管理员 id=1
     user_data = User.annotate(key=F("id")).filter(**query).filter(id__not=1).all()
     # 总数
     total = await user_data.count()
@@ -206,6 +218,7 @@ async def account_login(req: Request, post: user.AccountLogin):
             "user_id": mobile_user.pk,
             "user_type": mobile_user.user_type
         }
+
         jwt_token = create_access_token(data=jwt_data)
         data = {"token": jwt_token, "expires_in": settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES * 60}
         await write_access_log(req, mobile_user.pk, "通过手机号登陆了系统!")
@@ -233,7 +246,8 @@ async def account_login(req: Request, post: user.AccountLogin):
 
     return fail(msg="至少选择一种登陆方式!")
 
-
+# 个人信息的管理
+# 获取用户最近的10条访问信息记录
 @router.get("/access/log", dependencies=[Security(check_permissions)], summary="用户访问记录")
 async def get_access_log(req: Request):
     """
@@ -258,7 +272,7 @@ async def update_user_info(req: Request, post: UpdateUserInfo):
     await User.filter(id=req.state.user_id).update(**post.dict(exclude_none=True))
     return success(msg="更新成功!")
 
-
+# 修改手机号
 @router.put("/modify/mobile", dependencies=[Security(check_permissions)], summary="用户手机号修改")
 async def update_user_info(req: Request, post: ModifyMobile):
     """
@@ -273,7 +287,10 @@ async def update_user_info(req: Request, post: ModifyMobile):
     await User.filter(id=req.state.user_id).update(user_phone=post.mobile)
     return success(msg="手机号修改成功,登陆请用新绑定的手机号码!")
 
-
+# 接收上传的文件
+# 生成随机文件名
+# 保存到指定目录
+# 更新用户头像路径
 @router.put("/avatar/upload", dependencies=[Security(check_permissions)], summary="头像修改")
 async def avatar_upload(req: Request, avatar: UploadFile = File(...)):
     """

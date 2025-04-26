@@ -87,6 +87,7 @@ async def check_permissions(req: Request, security_scopes: SecurityScopes, token
             headers={"WWW-Authenticate": f"Bearer {token}"},
         )
 
+    # 日志端会打印出来
     except (PyJWTError, ValidationError):
 
         raise HTTPException(
