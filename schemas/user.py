@@ -1,8 +1,7 @@
 # -*- coding:utf-8 -*-
 """
-@Time : 2022/4/27 5:29 PM
-@Author: binkuolo
 @Des: schemas模型
+请求/响应数据的验证和转换
 """
 from datetime import datetime
 from pydantic import Field, BaseModel, validator
@@ -76,7 +75,7 @@ class UserListItem(BaseModel):
     create_time: datetime
     update_time: datetime
 
-
+# 使用Optional表示可选字段
 class CurrentUser(BaseResp):
     data: UserInfo
 
