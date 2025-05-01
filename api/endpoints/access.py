@@ -1,9 +1,5 @@
 # -*- coding:utf-8 -*-
-"""
-@Time : 2022/5/18 1:03 AM
-@Author: binkuolo
-@Des: 权限管理
-"""
+
 from fastapi import APIRouter, Security
 from tortoise.queryset import F
 from core.Auth import check_permissions

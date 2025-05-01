@@ -16,6 +16,19 @@ router = APIRouter(prefix='/role')
 
 @router.get("/all", summary="所有角色下拉选项专用", dependencies=[Security(check_permissions, scopes=["user_role"])])
 async def all_roles_options(user_id: int = Query(None)):
+    """
+    获取所有启用状态的角色选项（用于前端下拉菜单）
+    若传入用户ID，同时返回该用户已关联的角色ID列表
+    
+    参数:
+        user_id (int, optional): 用户ID用于查询其关联角色
+        
+    返回:
+        {
+            "all_role": [{"label": roleName, "value": roleId}], 
+            "user_roles": [roleId1, roleId2]
+        }
+    """
     # 查询启用的角色
     roles = await Role.annotate(label=F("role_name"), value=F('id')).filter(role_status=True).values('label', "value")
     user_roles = []
@@ -33,9 +46,15 @@ async def all_roles_options(user_id: int = Query(None)):
 @router.post("", summary="角色添加", dependencies=[Security(check_permissions, scopes=["role_add"])])
 async def create_role(post: CreateRole):
     """
-    创建角色
-    :param post: CreateRole
-    :return:
+    创建新角色接口
+    需要role_add权限
+    
+    参数:
+        post (CreateRole): 包含角色名称、描述等必要字段的创建对象
+        
+    返回:
+        成功: {"code": 200, "msg": "创建成功!"}
+        失败: {"code": 400, "msg": "创建失败!"}
     """
     result = await Role.create(**post.dict())
     if not result:
@@ -46,9 +65,15 @@ async def create_role(post: CreateRole):
 @router.delete("", summary="角色删除", dependencies=[Security(check_permissions, scopes=["role_delete"])])
 async def delete_role(role_id: int):
     """
-    删除角色
-    :param role_id:
-    :return:
+    删除指定ID的角色
+    需要role_delete权限
+    
+    参数:
+        role_id (int): 待删除角色的数据库主键ID
+        
+    返回:
+        成功: {"code": 200, "msg": "删除成功!"}
+        失败: {"code": 400, "msg": "角色不存在/删除失败!"}
     """
     role = await Role.get_or_none(pk=role_id)
     if not role:
@@ -62,9 +87,15 @@ async def delete_role(role_id: int):
 @router.put("", summary="角色修改", dependencies=[Security(check_permissions, scopes=["role_update"])])
 async def update_role(post: UpdateRole):
     """
-    更新角色
-    :param post:
-    :return:
+    更新角色基础信息
+    需要role_update权限
+    
+    参数:
+        post (UpdateRole): 包含id及其他可更新字段的对象
+        
+    返回:
+        成功: {"code": 200, "msg": "更新成功!"}
+        失败: {"code": 400, "msg": "更新失败!"}
     """
     data = post.dict()
     data.pop("id")
@@ -82,16 +113,25 @@ async def get_all_role(
         role_name: str = Query(None),
         role_status: bool = Query(None),
         create_time: List[str] = Query(None)
-
 ) -> RoleList:
     """
-    角色列表
-    :param role_status:
-    :param pageSize:
-    :param current:
-    :param role_name:
-    :param create_time:
-    :return:
+    分页查询角色列表
+    需要role_query权限
+    
+    参数:
+        pageSize (int): 每页记录数
+        current (int): 当前页码
+        role_name (str, optional): 按角色名称模糊查询
+        role_status (bool, optional): 按启用状态过滤
+        create_time (List[str], optional): 按创建时间范围过滤
+        
+    返回:
+        Ant Design Pro Table标准分页格式:
+        {
+            "data": [...],
+            "total": 总记录数,
+            "success": True
+        }
     """
     query = {}
     if role_name:
