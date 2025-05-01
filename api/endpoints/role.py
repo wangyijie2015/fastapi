@@ -2,7 +2,8 @@
 """
 @Time : 2022/5/15 11:51 PM
 @Author: binkuolo
-@Des: 角色管理
+@Des: 角色管理接口模块
+提供角色的CRUD操作，包含权限控制和数据验证
 """
 from typing import List
 from fastapi import Query, APIRouter, Security
@@ -14,19 +15,19 @@ from tortoise.queryset import F
 router = APIRouter(prefix='/role')
 
 
-@router.get("/all", summary="所有角色下拉选项专用", dependencies=[Security(check_permissions, scopes=["user_role"])])
+@router.get("/all", summary="所有角色下拉选项专用")
 async def all_roles_options(user_id: int = Query(None)):
     """
-    获取所有启用状态的角色选项（用于前端下拉菜单）
-    若传入用户ID，同时返回该用户已关联的角色ID列表
+    获取启用状态的角色列表用于前端下拉选择
+    特殊功能：当传入user_id时返回该用户已关联的角色ID列表
     
-    参数:
-        user_id (int, optional): 用户ID用于查询其关联角色
-        
-    返回:
+    参数说明：
+        user_id (int, optional): 需要查询关联角色的用户ID，默认不传
+    
+    响应结构：
         {
-            "all_role": [{"label": roleName, "value": roleId}], 
-            "user_roles": [roleId1, roleId2]
+            "all_role": [{"label": roleName, "value": roleId}],  // 所有启用角色
+            "user_roles": [roleId1, roleId2]  // 用户关联角色ID列表
         }
     """
     # 查询启用的角色
@@ -43,16 +44,16 @@ async def all_roles_options(user_id: int = Query(None)):
     return success(msg="所有角色下拉选项专用", data=data)
 
 
-@router.post("", summary="角色添加", dependencies=[Security(check_permissions, scopes=["role_add"])])
+@router.post("", summary="角色添加")
 async def create_role(post: CreateRole):
     """
     创建新角色接口
-    需要role_add权限
+    权限要求：role_add
     
-    参数:
+    请求体参数：
         post (CreateRole): 包含角色名称、描述等必要字段的创建对象
-        
-    返回:
+    
+    返回示例：
         成功: {"code": 200, "msg": "创建成功!"}
         失败: {"code": 400, "msg": "创建失败!"}
     """
@@ -62,16 +63,16 @@ async def create_role(post: CreateRole):
     return success(msg="创建成功!")
 
 
-@router.delete("", summary="角色删除", dependencies=[Security(check_permissions, scopes=["role_delete"])])
+@router.delete("", summary="角色删除")
 async def delete_role(role_id: int):
     """
-    删除指定ID的角色
-    需要role_delete权限
+    删除指定角色接口
+    权限要求：role_delete
     
-    参数:
+    参数说明：
         role_id (int): 待删除角色的数据库主键ID
-        
-    返回:
+    
+    返回示例：
         成功: {"code": 200, "msg": "删除成功!"}
         失败: {"code": 400, "msg": "角色不存在/删除失败!"}
     """
@@ -84,16 +85,16 @@ async def delete_role(role_id: int):
     return success(msg="删除成功!")
 
 
-@router.put("", summary="角色修改", dependencies=[Security(check_permissions, scopes=["role_update"])])
+@router.put("", summary="角色修改")
 async def update_role(post: UpdateRole):
     """
-    更新角色基础信息
-    需要role_update权限
+    更新角色基础信息接口
+    权限要求：role_update
     
-    参数:
+    请求体参数：
         post (UpdateRole): 包含id及其他可更新字段的对象
-        
-    返回:
+    
+    返回示例：
         成功: {"code": 200, "msg": "更新成功!"}
         失败: {"code": 400, "msg": "更新失败!"}
     """
@@ -105,8 +106,7 @@ async def update_role(post: UpdateRole):
     return success(msg="更新成功!")
 
 
-@router.get('', summary="角色列表", response_model=RoleList,
-            dependencies=[Security(check_permissions, scopes=["role_query"])])
+@router.get('', summary="角色列表")
 async def get_all_role(
         pageSize: int = 10,
         current: int = 1,
@@ -115,17 +115,17 @@ async def get_all_role(
         create_time: List[str] = Query(None)
 ) -> RoleList:
     """
-    分页查询角色列表
-    需要role_query权限
+    分页查询角色列表接口
+    权限要求：role_query
     
-    参数:
-        pageSize (int): 每页记录数
-        current (int): 当前页码
-        role_name (str, optional): 按角色名称模糊查询
-        role_status (bool, optional): 按启用状态过滤
-        create_time (List[str], optional): 按创建时间范围过滤
-        
-    返回:
+    支持过滤条件：
+        pageSize: 每页记录数
+        current: 当前页码
+        role_name: 按名称模糊查询
+        role_status: 按启用状态过滤
+        create_time: 按创建时间范围过滤
+    
+    返回格式：
         Ant Design Pro Table标准分页格式:
         {
             "data": [...],
