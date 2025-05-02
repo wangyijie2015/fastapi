@@ -1,8 +1,5 @@
 # -*- coding:utf-8 -*-
 """
-@Time : 2022/4/24 10:15 AM
-@Author: binkuolo
-@Des: mysql数据库
 """
 
 from fastapi import FastAPI
@@ -16,11 +13,11 @@ DB_ORM_CONFIG = {
         "base": {
             'engine': 'tortoise.backends.mysql',
             "credentials": {
-                'host': os.getenv('BASE_HOST', '127.0.0.1'),
+                'host': os.getenv('BASE_HOST', 'localhost'),
                 'user': os.getenv('BASE_USER', 'root'),
-                'password': os.getenv('BASE_PASSWORD', '123456'),
+                'password': os.getenv('BASE_PASSWORD', 'byd123123'),
                 'port': int(os.getenv('BASE_PORT', 3306)),
-                'database': os.getenv('BASE_DB', 'base'),
+                'database': os.getenv('BASE_DB', 'book'),
             }
         },
         # "db2": {

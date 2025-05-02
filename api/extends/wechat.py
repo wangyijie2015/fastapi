@@ -154,6 +154,8 @@ async def call(req: Request, code: str, state: str):
         return req.app.state.views.TemplateResponse("wechat.html", {"request": req, "errmsg": e.errmsg})
 
 
+# 对于http://localhost:8000/api/v1/wechat/auth/url 生成授权->扫码登录
+# 对于 /auth/check 获取到data下的token,对于token提供给前端，则前端可以正确登录
 @router.get('/auth/check')
 async def scan_check(req: Request):
     # 获取session中的值 唯一字符串
